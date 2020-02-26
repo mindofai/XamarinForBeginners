@@ -3,10 +3,10 @@
              xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:prism="http://prismlibrary.com"
+             Title="{Binding SelectedAnime.Title}"
+             Padding="0"
              prism:ViewModelLocator.AutowireViewModel="True">
     <ContentPage.Content>
-        <StackLayout VerticalOptions="CenterAndExpand">
-            <Label Text="Anime Web Page" />
-        </StackLayout>
+        <WebView Source="{Binding SelectedAnime.Website}" />
     </ContentPage.Content>
 </ContentPage>

@@ -5,11 +5,51 @@
              xmlns:prism="http://prismlibrary.com"
              Padding="20"
              prism:ViewModelLocator.AutowireViewModel="True">
+
     <ContentPage.Content>
-        <StackLayout VerticalOptions="CenterAndExpand">
-            <Label Text="Search Anime Page" />
-            <Button Command="{Binding ProceedCommand}"
-                    Text="Proceed" />
-        </StackLayout>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+
+            <ListView Grid.Row="1"
+                      HasUnevenRows="False"
+                      ItemsSource="{Binding AnimeDetails}"
+                      RowHeight="120"
+                      SeparatorVisibility="None">
+
+                <ListView.Behaviors>
+                    <prism:EventToCommandBehavior Command="{Binding ItemTappedCommand}" EventArgsConverter="{StaticResource ItemTappedEventArgsConverter}" EventName="ItemTapped" />
+                </ListView.Behaviors>
+
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <ViewCell>
+                            <Grid Padding="20">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="80" />
+                                    <ColumnDefinition />
+                                </Grid.ColumnDefinitions>
+
+                                <Image Aspect="AspectFit"
+                                       BackgroundColor="Red"
+                                       HeightRequest="80"
+                                       Source="{Binding ImageSrc}"
+                                       WidthRequest="80" />
+
+                                <StackLayout Grid.Column="1" VerticalOptions="CenterAndExpand">
+                                    <Label FontSize="18" Text="{Binding Title}" />
+                                    <Label LineBreakMode="TailTruncation" MaxLines="1" Text="{Binding Synopsis}" />
+                                </StackLayout>
+
+                            </Grid>
+                        </ViewCell>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+
+
+        </Grid>
     </ContentPage.Content>
 </ContentPage>

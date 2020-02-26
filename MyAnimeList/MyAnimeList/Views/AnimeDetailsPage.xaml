@@ -3,12 +3,45 @@
              xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:prism="http://prismlibrary.com"
+             Title="{Binding SelectedAnime.Title}"
+             Padding="20"
              prism:ViewModelLocator.AutowireViewModel="True">
+
     <ContentPage.Content>
-        <StackLayout VerticalOptions="CenterAndExpand">
-            <Label Text="Anime Details Page" />
-            <Button Command="{Binding ProceedCommand}"
-                    Text="Proceed" />
-        </StackLayout>
+        <Grid RowSpacing="10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+
+            <StackLayout>
+                <Image BackgroundColor="Red"
+                       HeightRequest="70"
+                       HorizontalOptions="CenterAndExpand"
+                       Source="{Binding SelectedAnime.ImageSrc}"
+                       WidthRequest="70" />
+
+                <Label FontSize="14" HorizontalOptions="CenterAndExpand">
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="Rating: " />
+                            <Span Text="{Binding SelectedAnime.Rating}" />
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+            </StackLayout>
+
+            <StackLayout Grid.Row="1">
+                <Label FontSize="14" Text="Title" />
+                <Label FontSize="16" Text="{Binding SelectedAnime.Title}" />
+                <Label FontSize="14" Text="Synopsis" />
+                <Label FontSize="16" Text="{Binding SelectedAnime.Synopsis}" />
+                <Label FontSize="14" Text="Start Date" />
+                <Label FontSize="16" Text="{Binding SelectedAnime.StartDate}" />
+                <Label FontSize="14" Text="End Date" />
+                <Label FontSize="16" Text="{Binding SelectedAnime.StartDate}" />
+                <Button BackgroundColor="#004d40" Command="{Binding VisitSiteCommand}" Text="VISIT SITE" TextColor="White" />
+            </StackLayout>
+        </Grid>
     </ContentPage.Content>
 </ContentPage>
