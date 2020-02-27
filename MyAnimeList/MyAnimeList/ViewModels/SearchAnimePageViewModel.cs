@@ -1,12 +1,15 @@
 ﻿using MyAnimeList.Models;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Prism.Commands;
 using Prism.Mvvm;
 using Prism.Navigation;
+using Prism.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Xamarin.Essentials;
 
 namespace MyAnimeList.ViewModels
 {
@@ -22,6 +25,8 @@ namespace MyAnimeList.ViewModels
         #endregion
 
         #region Properties
+
+        protected IPageDialogService DialogService { get; private set; }
 
         public string SearchKeyword
         {
@@ -54,8 +59,11 @@ namespace MyAnimeList.ViewModels
 
         #region Constructor
 
-        public SearchAnimePageViewModel(INavigationService navigationService) : base(navigationService)
+        public SearchAnimePageViewModel(INavigationService navigationService, IPageDialogService dialogService) : base(navigationService)
         {
+
+            DialogService = dialogService;
+
             ItemTappedCommand = new DelegateCommand<AnimeDetailsModel>(async (item) => await ExecuteItemTappedCommand(item));
 
             SearchCommand = new DelegateCommand(async() => await ExecuteSearchCommand());
@@ -71,14 +79,25 @@ namespace MyAnimeList.ViewModels
         private async Task PerformSearch()
         {
 
-            var url = $"{Constants.BaseAddress}{SearchKeyword}&limit={Constants.Limit}";
-            var httpClient = new System.Net.Http.HttpClient();
-            var httpResponse = await httpClient.GetAsync(url);
-            var httpResult = httpResponse.Content.ReadAsStringAsync().Result;
-            var httpData = JsonConvert.DeserializeObject<AnimeListModel>(httpResult);
+            var networkAccess = Connectivity.NetworkAccess;
 
-            AnimeDetails = httpData.Animes;
+            if (networkAccess == NetworkAccess.Internet)
+            {
 
+                var url = $"{Constants.BaseAddress}{SearchKeyword}&limit={Constants.Limit}";
+                var httpClient = new System.Net.Http.HttpClient();
+                var httpResponse = await httpClient.GetAsync(url);
+                var httpResult = httpResponse.Content.ReadAsStringAsync().Result;
+                var test = JObject.Parse(httpResult);
+                var httpData = JsonConvert.DeserializeObject<AnimeListModel>(httpResult);
+
+                AnimeDetails = httpData.Animes;
+            }
+
+            else 
+            {
+                await DialogService.DisplayAlertAsync("Network error", "Please check your internet connection and try again.", "OK");
+            }
         }
 
         public override void OnNavigatedTo(INavigationParameters parameters)
