@@ -1,4 +1,5 @@
 ﻿using MyAnimeList.Models;
+using Newtonsoft.Json;
 using Prism.Commands;
 using Prism.Mvvm;
 using Prism.Navigation;
@@ -11,30 +12,32 @@ namespace MyAnimeList.ViewModels
 {
     public class SearchAnimePageViewModel : ViewModelBase
     {
-        public SearchAnimePageViewModel(INavigationService navigationService) : base(navigationService)
-        {
-            ItemTappedCommand = new DelegateCommand<AnimeDetailsModel>(async (item) => await ExecuteItemTappedCommand(item));
-        }
 
-
-        private async Task AcquireData()
-        {
-            //Add Internet Checking 
-            //Add API
-
-            AnimeDetails = new List<AnimeDetailsModel>()
-            {
-                new AnimeDetailsModel() { Id = 1, Title = "One Piece", Synopsis = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ", StartDate = "01/01/1990", EndDate = "12/12/2019", ImageSrc = "https://seeklogo.com/images/X/xamarin-logo-348B1EB629-seeklogo.com.png", Rating = 1.0, Website = "https://www.viz.com/one-piece" },
-                new AnimeDetailsModel() { Id = 2, Title = "One Piece GOLD", Synopsis = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ", StartDate = "01/01/1990", EndDate = "12/12/2019", ImageSrc = "https://seeklogo.com/images/X/xamarin-logo-348B1EB629-seeklogo.com.png", Rating = 2.0, Website = "https://www.viz.com/one-piece" },
-                new AnimeDetailsModel() { Id = 3, Title = "One Piece SILVER", Synopsis = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ", StartDate = "01/01/1990", EndDate = "12/12/2019", ImageSrc = "https://seeklogo.com/images/X/xamarin-logo-348B1EB629-seeklogo.com.png", Rating = 3.0, Website = "https://www.viz.com/one-piece" },
-                new AnimeDetailsModel() { Id = 3, Title = "One Piece PLATINUM", Synopsis = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ", StartDate = "01/01/1990", EndDate = "12/12/2019", ImageSrc = "https://seeklogo.com/images/X/xamarin-logo-348B1EB629-seeklogo.com.png", Rating = 4.0, Website = "https://www.viz.com/one-piece" },
-                 new AnimeDetailsModel() { Id = 3, Title = "One Piece EMERALD", Synopsis = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ", StartDate = "01/01/1990", EndDate = "12/12/2019", ImageSrc = "https://seeklogo.com/images/X/xamarin-logo-348B1EB629-seeklogo.com.png", Rating = 5.0, Website = "https://www.viz.com/one-piece" }
-            };
-
-            await Task.FromResult(0);
-        }
+        #region Fields
 
         private List<AnimeDetailsModel> _animeDetails;
+        private string _searchKeyword;
+        private bool _isRefreshing;
+
+        #endregion
+
+        #region Properties
+
+        public string SearchKeyword
+        {
+            get => _searchKeyword;
+            set
+            {
+                SetProperty(ref _searchKeyword, value);
+            }
+        }
+
+        public bool IsRefreshing 
+        {
+            get => _isRefreshing;
+            set => SetProperty(ref _isRefreshing, value);
+        }
+
         public List<AnimeDetailsModel> AnimeDetails
         {
             get => _animeDetails;
@@ -42,6 +45,51 @@ namespace MyAnimeList.ViewModels
         }
 
         public DelegateCommand<AnimeDetailsModel> ItemTappedCommand { get; private set; }
+
+        public DelegateCommand SearchCommand { get; private set; }
+
+        public DelegateCommand RefreshCommand { get; private set; }
+
+        #endregion
+
+        #region Constructor
+
+        public SearchAnimePageViewModel(INavigationService navigationService) : base(navigationService)
+        {
+            ItemTappedCommand = new DelegateCommand<AnimeDetailsModel>(async (item) => await ExecuteItemTappedCommand(item));
+
+            SearchCommand = new DelegateCommand(async() => await ExecuteSearchCommand());
+
+            RefreshCommand = new DelegateCommand(async () => await ExecuteRefreshCommand());
+
+        }
+
+        #endregion
+
+        #region Methods
+
+        private async Task PerformSearch()
+        {
+
+            var url = $"{Constants.BaseAddress}{SearchKeyword}&limit={Constants.Limit}";
+            var httpClient = new System.Net.Http.HttpClient();
+            var httpResponse = await httpClient.GetAsync(url);
+            var httpResult = httpResponse.Content.ReadAsStringAsync().Result;
+            var httpData = JsonConvert.DeserializeObject<AnimeListModel>(httpResult);
+
+            AnimeDetails = httpData.Animes;
+
+        }
+
+        public override void OnNavigatedTo(INavigationParameters parameters)
+        {
+            base.OnNavigatedTo(parameters);
+        }
+
+        #endregion
+
+
+        #region Commands
 
         private async Task ExecuteItemTappedCommand(AnimeDetailsModel item)
         {
@@ -51,14 +99,29 @@ namespace MyAnimeList.ViewModels
             await NavigationService.NavigateAsync("AnimeDetailsPage", navParameters);
         }
 
-        public async override void OnNavigatedTo(INavigationParameters parameters)
-        {
-            base.OnNavigatedTo(parameters);
 
-            if (AnimeDetails == null)
+        private async Task ExecuteRefreshCommand() 
+        {
+            if (!string.IsNullOrWhiteSpace(SearchKeyword))
             {
-                await AcquireData();
+                await PerformSearch();
+            }
+
+            IsRefreshing = false;
+        }
+
+        private async Task ExecuteSearchCommand() 
+        {
+            if (!string.IsNullOrWhiteSpace(SearchKeyword) && !IsRefreshing)
+            {
+                IsRefreshing = true;
+                await PerformSearch();
+                IsRefreshing = false;
             }
         }
+
+        #endregion
+
+        
     }
 }

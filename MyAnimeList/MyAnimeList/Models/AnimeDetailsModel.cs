@@ -1,4 +1,5 @@
-﻿using Prism.Mvvm;
+﻿using Newtonsoft.Json;
+using Prism.Mvvm;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -8,6 +9,8 @@ namespace MyAnimeList.Models
     public class AnimeDetailsModel : BindableBase
     {
         private int _id;
+
+        [JsonProperty(PropertyName = "mal_id")]
         public int Id
         {
             get => _id;
@@ -15,6 +18,8 @@ namespace MyAnimeList.Models
         }
 
         private string _website;
+
+        [JsonProperty(PropertyName = "url")]
         public string Website
         {
             get => _website;
@@ -22,6 +27,8 @@ namespace MyAnimeList.Models
         }
 
         private string _title;
+
+        [JsonProperty(PropertyName = "title")]
         public string Title
         {
             get => _title;
@@ -29,13 +36,18 @@ namespace MyAnimeList.Models
         }
 
         private string _imageSrc;
+
+        [JsonProperty(PropertyName = "image_url")]
         public string ImageSrc
         {
             get => _imageSrc;
             set => SetProperty(ref _imageSrc, value);
         }
 
+
         private string _synopsis;
+
+        [JsonProperty(PropertyName = "synopsis")]
         public string Synopsis
         {
             get => _synopsis;
@@ -43,21 +55,27 @@ namespace MyAnimeList.Models
         }
 
         private double _rating;
+
+        [JsonProperty(PropertyName = "score")]
         public double Rating
         {
             get => _rating;
             set => SetProperty(ref _rating, value);
         }
 
-        private string _startDate;
-        public string StartDate
+        private DateTime? _startDate;
+
+        [JsonProperty(PropertyName = "start_date")]
+        public DateTime? StartDate
         {
             get => _startDate;
             set => SetProperty(ref _startDate, value);
-        }
+        } 
 
-        private string _endDate;
-        public string EndDate
+        private DateTime? _endDate;
+
+        [JsonProperty(PropertyName = "end_date")]
+        public DateTime? EndDate
         {
             get => _endDate;
             set => SetProperty(ref _endDate, value);
