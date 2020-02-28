@@ -22,7 +22,6 @@ namespace MyAnimeList.ViewModels
         private List<AnimeDetailsModel> _animeDetails;
         private string _searchKeyword;
         private bool _isRefreshing;
-        static readonly HttpClient httpClient = new HttpClient();
 
         #endregion
 
@@ -81,25 +80,7 @@ namespace MyAnimeList.ViewModels
         private async Task PerformSearch()
         {
 
-            var networkAccess = Connectivity.NetworkAccess;
-
-            if (networkAccess == NetworkAccess.Internet)
-            {
-
-                var url = $"{Constants.BaseAddress}{SearchKeyword}{Constants.Limit}{5}";
-                
-                HttpResponseMessage httpResponse = await httpClient.GetAsync(url);
-                string httpResult = httpResponse.Content.ReadAsStringAsync().Result;
-                var httpData = JsonConvert.DeserializeObject<AnimeListModel>(httpResult);
-
-                AnimeDetails = httpData.Animes;
-
-            }
-
-            else 
-            {
-                await DialogService.DisplayAlertAsync("Network error", "Please check your internet connection and try again.", "OK");
-            }
+            //Add search 
         }
 
         public override void OnNavigatedTo(INavigationParameters parameters)
