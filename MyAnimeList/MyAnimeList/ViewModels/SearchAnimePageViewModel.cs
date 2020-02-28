@@ -8,6 +8,7 @@ using Prism.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Xamarin.Essentials;
 
@@ -21,6 +22,7 @@ namespace MyAnimeList.ViewModels
         private List<AnimeDetailsModel> _animeDetails;
         private string _searchKeyword;
         private bool _isRefreshing;
+        static readonly HttpClient httpClient = new HttpClient();
 
         #endregion
 
@@ -84,14 +86,14 @@ namespace MyAnimeList.ViewModels
             if (networkAccess == NetworkAccess.Internet)
             {
 
-                var url = $"{Constants.BaseAddress}{SearchKeyword}&limit={Constants.Limit}";
-                var httpClient = new System.Net.Http.HttpClient();
-                var httpResponse = await httpClient.GetAsync(url);
-                var httpResult = httpResponse.Content.ReadAsStringAsync().Result;
-                var test = JObject.Parse(httpResult);
+                var url = $"{Constants.BaseAddress}{SearchKeyword}{Constants.Limit}{5}";
+                
+                HttpResponseMessage httpResponse = await httpClient.GetAsync(url);
+                string httpResult = httpResponse.Content.ReadAsStringAsync().Result;
                 var httpData = JsonConvert.DeserializeObject<AnimeListModel>(httpResult);
 
                 AnimeDetails = httpData.Animes;
+
             }
 
             else 
